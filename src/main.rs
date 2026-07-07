@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 #[derive(Debug, Clone, PartialEq)]
 enum Token {
     LParen,
@@ -117,10 +119,34 @@ fn eval_atom(atom: &str) -> Result<Value, String> {
     }
 }
 
+fn apply(op: &str, args: &[Value]) -> Result<Value, String> {
+    match op {
+        "+" => {
+            let mut sum = 0.0;
+            for arg in args {
+                match arg {
+                    Value::Number(n) => sum += n,
+                    other => return Err(format!("invalid symbol {:?}", other)),
+                }
+            }
+            Ok(Value::Number(sum))
+        }
+        _ => Err(format!("unsupported: {}", op)),
+    }
+}
+
 fn eval(expr: &Sexp) -> Result<Value, String> {
     match expr {
         Sexp::Atom(a) => eval_atom(a),
-        Sexp::List(_) => todo!(),
+        Sexp::List(items) => {
+            let (head, args) = items.split_first().ok_or("empty list")?;
+            let argv: Vec<Value> = args.iter().map(eval).collect::<Result<_, _>>()?;
+
+            match head {
+                Sexp::Atom(a) => apply(a, &argv),
+                Sexp::List(_) => Err(format!("cannot call: {:?}", head)),
+            }
+        }
     }
 }
 
@@ -137,7 +163,7 @@ fn read(src: &str) -> Result<Vec<Sexp>, String> {
 fn main() {
     // let src = "(define (square x) (* x x)) (print (square 5))";
 
-    for src in ["5", "#t", "#f", "no"] {
+    for src in ["5", "#t", "#f", "no", "(+ 1 2)", "(+ 1 (+ 2 3))"] {
         match read(src) {
             Ok(e) => {
                 for expr in e {
