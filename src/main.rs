@@ -87,6 +87,43 @@ impl Parser {
     }
 }
 
+type Builtin = fn(&[Value]) -> Result<Value, String>;
+
+#[derive(Debug)]
+struct Lambda {
+    params: Vec<String>,
+    body: Vec<Sexp>,
+}
+
+#[derive(Debug)]
+enum Value {
+    Number(f64),
+    Bool(bool),
+    Builtin(Builtin),
+    Lambda(Lambda),
+}
+
+const TRUE_TOKEN: &str = "#t";
+const FALSE_TOKEN: &str = "#f";
+
+fn eval_atom(atom: &str) -> Result<Value, String> {
+    match atom {
+        TRUE_TOKEN => Ok(Value::Bool(true)),
+        FALSE_TOKEN => Ok(Value::Bool(false)),
+        _ => atom
+            .parse::<f64>()
+            .map(Value::Number)
+            .map_err(|_| format!("cannot eval {}", atom)),
+    }
+}
+
+fn eval(expr: &Sexp) -> Result<Value, String> {
+    match expr {
+        Sexp::Atom(a) => eval_atom(a),
+        Sexp::List(_) => todo!(),
+    }
+}
+
 fn read(src: &str) -> Result<Vec<Sexp>, String> {
     let tokens = lex(src);
     let mut parser = Parser::new(tokens);
@@ -98,16 +135,16 @@ fn read(src: &str) -> Result<Vec<Sexp>, String> {
 }
 
 fn main() {
-    let src = "(define (square x) (* x x)) (print (square 5))";
+    // let src = "(define (square x) (* x x)) (print (square 5))";
 
-    println!("{}\n", src);
-
-    match read(src) {
-        Err(e) => eprintln!("parse error: {}", e),
-        Ok(s) => {
-            for expr in s {
-                println!("{:?}", expr)
+    for src in ["5", "#t", "#f", "no"] {
+        match read(src) {
+            Ok(e) => {
+                for expr in e {
+                    println!("{} => {:?}", src, eval(&expr));
+                }
             }
+            Err(err) => eprintln!("parse err: {}", err),
         }
     }
 }
