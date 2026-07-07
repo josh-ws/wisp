@@ -5,22 +5,34 @@ mod reader;
 mod value;
 
 use crate::builtins::bootstrap_env;
-use crate::env::Env;
 use crate::eval::eval;
 use crate::reader::read;
+use std::io::{self, BufRead, Write};
 
 fn main() {
-    // let src = "(define (square x) (* x x)) (print (square 5))";
     let mut env = bootstrap_env();
+    let mut lines = io::stdin().lock().lines();
+    loop {
+        print!("> ");
+        io::stdout().flush().unwrap();
 
-    for src in ["5", "#t", "#f", "no", "(+ 1 2)", "(+ 1 (+ 2 3))"] {
-        match read(src) {
-            Ok(e) => {
-                for expr in e {
-                    println!("{} => {:?}", src, eval(&mut env, &expr));
+        match lines.next() {
+            Some(Ok(line)) => match read(&line) {
+                Ok(exprs) => {
+                    for expr in exprs {
+                        match eval(&mut env, &expr) {
+                            Ok(v) => println!("{:?}", v),
+                            Err(e) => eprintln!("error: {}", e),
+                        }
+                    }
                 }
+                Err(e) => eprintln!("parse error: {}", e),
+            },
+            Some(Err(e)) => {
+                eprintln!("input error: {}", e);
+                break;
             }
-            Err(err) => eprintln!("parse err: {}", err),
+            None => break,
         }
     }
 }
