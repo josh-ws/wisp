@@ -17,8 +17,16 @@ fn add(args: &[Value]) -> Result<Value, String> {
     Ok(Value::Number(sum))
 }
 
+fn equal(args: &[Value]) -> Result<Value, String> {
+    match args {
+        [a, b] => Ok(Value::Bool(a == b)),
+        _ => Err("eq expects two args".into()),
+    }
+}
+
 pub fn bootstrap_env() -> Env {
     let mut e = Env::new();
     e.define("+".to_string(), Value::Builtin(add));
+    e.define("equal?".to_string(), Value::Builtin(equal));
     e
 }

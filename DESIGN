@@ -1,0 +1,2 @@
+- Sub with a single argument negates
+- Division by zero returns an error

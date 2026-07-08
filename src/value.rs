@@ -15,3 +15,13 @@ pub enum Value {
     Builtin(Builtin),
     Lambda(Lambda),
 }
+
+impl PartialEq for Value {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Value::Number(x), Value::Number(y)) => x == y,
+            (Value::Bool(x), Value::Bool(y)) => x == y,
+            _ => false,
+        }
+    }
+}
