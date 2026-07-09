@@ -8,7 +8,7 @@ const FALSE_TOKEN: &str = "#f";
 fn apply(f: &Value, args: &[Value]) -> Result<Value, String> {
     match f {
         Value::Builtin(f) => f(args),
-        other => Err(format!("symbol is not callable: {:?}", other)),
+        other => Err(format!("symbol is not callable: {}", other)),
     }
 }
 

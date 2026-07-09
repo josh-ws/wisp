@@ -11,7 +11,7 @@ fn add(args: &[Value]) -> Result<Value, String> {
     for arg in args {
         match arg {
             Value::Number(n) => sum += n,
-            other => return Err(format!("+ expects numbers, got {:?}", other)),
+            other => return Err(format!("+ expects numbers, got {}", other)),
         }
     }
     Ok(Value::Number(sum))

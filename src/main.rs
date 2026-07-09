@@ -21,7 +21,7 @@ fn main() {
                 Ok(exprs) => {
                     for expr in exprs {
                         match eval(&mut env, &expr) {
-                            Ok(v) => println!("{:?}", v),
+                            Ok(v) => println!("{}", v),
                             Err(e) => eprintln!("error: {}", e),
                         }
                     }
