@@ -20,4 +20,8 @@ impl Env {
     pub fn define(&mut self, key: String, value: Value) {
         self.vars.insert(key, value);
     }
+
+    pub fn remove(&mut self, key: &str) -> Option<Value> {
+        self.vars.remove(key)
+    }
 }

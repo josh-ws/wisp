@@ -1,13 +1,45 @@
 use crate::env::Env;
 use crate::reader::Sexp;
-use crate::value::Value;
+use crate::value::{Lambda, Value};
 
 const TRUE_TOKEN: &str = "#t";
 const FALSE_TOKEN: &str = "#f";
 
-fn apply(f: &Value, args: &[Value]) -> Result<Value, String> {
+fn apply(env: &mut Env, f: &Value, args: &[Value]) -> Result<Value, String> {
     match f {
         Value::Builtin(f) => f(args),
+        Value::Lambda(lambda) => {
+            if lambda.params.len() != args.len() {
+                let e = format!("expected {} args, got {}", lambda.params.len(), args.len());
+                return Err(e);
+            }
+
+            let mut saved: Vec<(String, Option<Value>)> = Vec::new();
+            for (p, arg) in lambda.params.iter().zip(args) {
+                let prev = env.get(p).cloned();
+                env.define(p.clone(), arg.clone());
+                saved.push((p.clone(), prev));
+            }
+
+            let mut result = Err("lambda: empty body".into());
+            for form in &lambda.body {
+                result = eval(env, form);
+                if result.is_err() {
+                    break;
+                }
+            }
+
+            for (param, prev) in saved {
+                match prev {
+                    Some(v) => env.define(param, v),
+                    None => {
+                        env.remove(&param);
+                    }
+                }
+            }
+
+            result
+        }
         other => Err(format!("symbol is not callable: {}", other)),
     }
 }
@@ -47,6 +79,29 @@ fn eval_if(env: &mut Env, args: &[Sexp]) -> Result<Value, String> {
     }
 }
 
+pub fn eval_lambda(args: &[Sexp]) -> Result<Value, String> {
+    let (p, body) = args.split_first().ok_or("empty list")?;
+    let Sexp::List(params) = p else {
+        return Err("syntax: (lambda (params...) body...)".into());
+    };
+    if body.is_empty() {
+        return Err("lambda: empty body".into());
+    }
+    let mut v = Vec::new();
+    for param in params {
+        match param {
+            Sexp::Atom(name) => v.push(name.clone()),
+            _ => {
+                return Err("lambda: params must be symbols".into());
+            }
+        }
+    }
+    Ok(Value::Lambda(Lambda {
+        params: v,
+        body: body.to_vec(),
+    }))
+}
+
 pub fn eval(env: &mut Env, expr: &Sexp) -> Result<Value, String> {
     match expr {
         Sexp::Atom(a) => eval_atom(env, a),
@@ -58,6 +113,7 @@ pub fn eval(env: &mut Env, expr: &Sexp) -> Result<Value, String> {
                 match sym.as_str() {
                     "define" => return eval_define(env, args),
                     "if" => return eval_if(env, args),
+                    "lambda" => return eval_lambda(args),
                     _ => {}
                 }
             }
@@ -67,7 +123,7 @@ pub fn eval(env: &mut Env, expr: &Sexp) -> Result<Value, String> {
                 .iter()
                 .map(|a| eval(env, a))
                 .collect::<Result<_, _>>()?;
-            apply(&func, &argv)
+            apply(env, &func, &argv)
         }
     }
 }
