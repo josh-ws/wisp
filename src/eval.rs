@@ -85,6 +85,22 @@ pub fn eval_lambda(args: &[Sexp]) -> Result<Value, String> {
     }))
 }
 
+fn quote(sexp: &Sexp) -> Result<Value, String> {
+    match sexp {
+        Sexp::Number(n) => Ok(Value::Number(*n)),
+        Sexp::Bool(b) => Ok(Value::Bool(*b)),
+        Sexp::Symbol(s) => Ok(Value::Symbol(s.clone())),
+        Sexp::List(_) => Err("quote: lists not supported".into()),
+    }
+}
+
+fn eval_quote(args: &[Sexp]) -> Result<Value, String> {
+    match args {
+        [t] => quote(t),
+        _ => Err("syntax: (quote ...)".into()),
+    }
+}
+
 pub fn eval(env: &mut Env, expr: &Sexp) -> Result<Value, String> {
     match expr {
         Sexp::Number(n) => Ok(Value::Number(*n)),
@@ -102,6 +118,7 @@ pub fn eval(env: &mut Env, expr: &Sexp) -> Result<Value, String> {
                     "define" => return eval_define(env, args),
                     "if" => return eval_if(env, args),
                     "lambda" => return eval_lambda(args),
+                    "quote" => return eval_quote(args),
                     _ => {}
                 }
             }
