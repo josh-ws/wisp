@@ -39,7 +39,9 @@ fn lex(src: &str) -> Vec<Token> {
 
 #[derive(Debug, Clone)]
 pub enum Sexp {
-    Atom(String),
+    Number(f64),
+    Bool(bool),
+    Symbol(String),
     List(Vec<Sexp>),
 }
 
@@ -68,7 +70,7 @@ impl Parser {
         match tok {
             Token::LParen => self.parse_list(),
             Token::RParen => Err("unexpected ')'".to_string()),
-            Token::Atom(a) => Ok(Sexp::Atom(a)),
+            Token::Atom(a) => Ok(classify(a)),
         }
     }
 
@@ -84,6 +86,17 @@ impl Parser {
                 _ => items.push(self.parse()?),
             }
         }
+    }
+}
+
+fn classify(a: String) -> Sexp {
+    match a.as_str() {
+        "#t" => Sexp::Bool(true),
+        "#f" => Sexp::Bool(false),
+        _ => match a.parse::<f64>() {
+            Ok(n) => Sexp::Number(n),
+            Err(_) => Sexp::Symbol(a),
+        },
     }
 }
 

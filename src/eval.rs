@@ -2,9 +2,6 @@ use crate::env::Env;
 use crate::reader::Sexp;
 use crate::value::{Lambda, Value};
 
-const TRUE_TOKEN: &str = "#t";
-const FALSE_TOKEN: &str = "#f";
-
 fn apply(env: &mut Env, f: &Value, args: &[Value]) -> Result<Value, String> {
     match f {
         Value::Builtin(f) => f(args),
@@ -44,23 +41,9 @@ fn apply(env: &mut Env, f: &Value, args: &[Value]) -> Result<Value, String> {
     }
 }
 
-fn eval_atom(env: &Env, atom: &str) -> Result<Value, String> {
-    match atom {
-        TRUE_TOKEN => Ok(Value::Bool(true)),
-        FALSE_TOKEN => Ok(Value::Bool(false)),
-        _ => match atom.parse::<f64>() {
-            Ok(n) => Ok(Value::Number(n)),
-            Err(_) => env
-                .get(atom)
-                .cloned()
-                .ok_or_else(|| format!("undefined: {}", atom)),
-        },
-    }
-}
-
 fn eval_define(env: &mut Env, args: &[Sexp]) -> Result<Value, String> {
     match args {
-        [Sexp::Atom(name), v] => {
+        [Sexp::Symbol(name), v] => {
             let res = eval(env, v)?;
             env.define(name.clone(), res.clone());
             Ok(res)
@@ -90,7 +73,7 @@ pub fn eval_lambda(args: &[Sexp]) -> Result<Value, String> {
     let mut v = Vec::new();
     for param in params {
         match param {
-            Sexp::Atom(name) => v.push(name.clone()),
+            Sexp::Symbol(name) => v.push(name.clone()),
             _ => {
                 return Err("lambda: params must be symbols".into());
             }
@@ -104,12 +87,17 @@ pub fn eval_lambda(args: &[Sexp]) -> Result<Value, String> {
 
 pub fn eval(env: &mut Env, expr: &Sexp) -> Result<Value, String> {
     match expr {
-        Sexp::Atom(a) => eval_atom(env, a),
+        Sexp::Number(n) => Ok(Value::Number(*n)),
+        Sexp::Bool(b) => Ok(Value::Bool(*b)),
+        Sexp::Symbol(s) => env
+            .get(s)
+            .cloned()
+            .ok_or_else(|| format!("undefined: {}", s)),
         Sexp::List(items) => {
             let (head, args) = items.split_first().ok_or("empty list")?;
 
             // Special forms
-            if let Sexp::Atom(sym) = head {
+            if let Sexp::Symbol(sym) = head {
                 match sym.as_str() {
                     "define" => return eval_define(env, args),
                     "if" => return eval_if(env, args),
