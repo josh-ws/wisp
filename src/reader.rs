@@ -2,6 +2,7 @@
 enum Token {
     LParen,
     RParen,
+    Quote,
     Atom(String),
 }
 
@@ -20,6 +21,10 @@ fn lex(src: &str) -> Vec<Token> {
             ')' => {
                 chars.next();
                 tokens.push(Token::RParen);
+            }
+            '\'' => {
+                chars.next();
+                tokens.push(Token::Quote);
             }
             _ => {
                 let mut s = String::new();
@@ -71,6 +76,10 @@ impl Parser {
             Token::LParen => self.parse_list(),
             Token::RParen => Err("unexpected ')'".to_string()),
             Token::Atom(a) => Ok(classify(a)),
+            Token::Quote => {
+                let inner = self.parse()?;
+                Ok(Sexp::List(vec![Sexp::Symbol("quote".to_string()), inner]))
+            }
         }
     }
 
