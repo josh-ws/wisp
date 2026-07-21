@@ -90,7 +90,13 @@ fn quote(sexp: &Sexp) -> Result<Value, String> {
         Sexp::Number(n) => Ok(Value::Number(*n)),
         Sexp::Bool(b) => Ok(Value::Bool(*b)),
         Sexp::Symbol(s) => Ok(Value::Symbol(s.clone())),
-        Sexp::List(_) => Err("quote: lists not supported".into()),
+        Sexp::List(l) => {
+            let mut vals = Vec::new();
+            for s in l {
+                vals.push(quote(s)?);
+            }
+            Ok(Value::List(vals))
+        }
     }
 }
 

@@ -14,6 +14,7 @@ pub struct Lambda {
 pub enum Value {
     Number(f64),
     Bool(bool),
+    List(Vec<Value>),
     Symbol(String),
     Builtin(Builtin),
     Lambda(Lambda),
@@ -24,6 +25,7 @@ impl PartialEq for Value {
         match (self, other) {
             (Value::Number(x), Value::Number(y)) => x == y,
             (Value::Bool(x), Value::Bool(y)) => x == y,
+            (Value::List(x), Value::List(y)) => x == y,
             (Value::Symbol(x), Value::Symbol(y)) => x == y,
             _ => false,
         }
@@ -39,6 +41,16 @@ impl Display for Value {
             Value::Symbol(sym) => write!(f, "'{}", sym),
             Value::Builtin(_) => write!(f, "#<builtin>"),
             Value::Lambda(l) => write!(f, "#<lambda>"),
+            Value::List(l) => {
+                write!(f, "(")?;
+                for (i, item) in l.iter().enumerate() {
+                    if i > 0 {
+                        write!(f, " ")?;
+                    }
+                    write!(f, "{}", item)?;
+                }
+                write!(f, ")")
+            }
         }
     }
 }
