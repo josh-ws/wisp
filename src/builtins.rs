@@ -1,4 +1,7 @@
-use crate::{env::Env, value::Value};
+use crate::{
+    env::{Arena, Env},
+    value::Value,
+};
 
 // quote, cond, lambda, define
 // atom, eq, car, cdr, cons
@@ -57,13 +60,14 @@ fn cons(args: &[Value]) -> Result<Value, String> {
     }
 }
 
-pub fn bootstrap_env() -> Env {
-    let mut e = Env::new();
-    e.define("+".to_string(), Value::Builtin(add));
-    e.define("equal?".to_string(), Value::Builtin(equal));
-    e.define("null?".to_string(), Value::Builtin(null));
-    e.define("car".to_string(), Value::Builtin(car));
-    e.define("cdr".to_string(), Value::Builtin(cdr));
-    e.define("cons".to_string(), Value::Builtin(cons));
-    e
+pub fn bootstrap_env() -> Arena {
+    let mut a = Arena::new();
+    let root = a.root();
+    a.define(root, "+".to_string(), Value::Builtin(add));
+    a.define(root, "equal?".to_string(), Value::Builtin(equal));
+    a.define(root, "null?".to_string(), Value::Builtin(null));
+    a.define(root, "car".to_string(), Value::Builtin(car));
+    a.define(root, "cdr".to_string(), Value::Builtin(cdr));
+    a.define(root, "cons".to_string(), Value::Builtin(cons));
+    a
 }

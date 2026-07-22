@@ -10,7 +10,9 @@ use crate::reader::read;
 use std::io::{self, BufRead, Write};
 
 fn main() {
-    let mut env = bootstrap_env();
+    let mut arena = bootstrap_env();
+    let root = arena.root();
+
     let mut lines = io::stdin().lock().lines();
     loop {
         print!("> ");
@@ -20,7 +22,7 @@ fn main() {
             Some(Ok(line)) => match read(&line) {
                 Ok(exprs) => {
                     for expr in exprs {
-                        match eval(&mut env, &expr) {
+                        match eval(&mut arena, root, &expr) {
                             Ok(v) => println!("{}", v),
                             Err(e) => eprintln!("error: {}", e),
                         }

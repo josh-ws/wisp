@@ -3,7 +3,7 @@ use std::{
     rc::Rc,
 };
 
-use crate::reader::Sexp;
+use crate::{env::Env, reader::Sexp};
 
 pub type Builtin = fn(&[Value]) -> Result<Value, String>;
 
@@ -11,6 +11,7 @@ pub type Builtin = fn(&[Value]) -> Result<Value, String>;
 pub struct Lambda {
     pub params: Vec<String>,
     pub body: Vec<Sexp>,
+    pub env: Env,
 }
 
 #[derive(Debug, Clone)]
