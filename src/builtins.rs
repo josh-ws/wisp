@@ -26,7 +26,7 @@ fn equal(args: &[Value]) -> Result<Value, String> {
 
 fn null(args: &[Value]) -> Result<Value, String> {
     match args {
-        [Value::List(a)] => Ok(Value::Bool(a.is_empty())),
+        [Value::Nil] => Ok(Value::Bool(true)),
         [_] => Ok(Value::Bool(false)),
         _ => Err("null? expects a single argument".into()),
     }
@@ -34,10 +34,8 @@ fn null(args: &[Value]) -> Result<Value, String> {
 
 fn car(args: &[Value]) -> Result<Value, String> {
     match args {
-        [Value::List(l)] => match l.first() {
-            Some(v) => Ok(v.clone()),
-            None => Err("car: empty list".into()),
-        },
+        [Value::Pair(p)] => Ok(p.car.clone()),
+        [Value::Nil] => Err("car: empty list".into()),
         [other] => Err(format!("car expects a list, got {}", other)),
         _ => Err("car expects one arg".into()),
     }
@@ -45,12 +43,17 @@ fn car(args: &[Value]) -> Result<Value, String> {
 
 fn cdr(args: &[Value]) -> Result<Value, String> {
     match args {
-        [Value::List(l)] => match l.split_first() {
-            Some((_, rest)) => Ok(Value::List(rest.to_vec())),
-            None => Err("cdr: empty list".into()),
-        },
+        [Value::Pair(p)] => Ok(p.cdr.clone()),
+        [Value::Nil] => Err("cdr: empty list".into()),
         [other] => Err(format!("cdr expects a list, got {}", other)),
         _ => Err("cdr expects one arg".into()),
+    }
+}
+
+fn cons(args: &[Value]) -> Result<Value, String> {
+    match args {
+        [a, b] => Ok(Value::cons(a.clone(), b.clone())),
+        _ => Err("cons expects two args".into()),
     }
 }
 
@@ -61,5 +64,6 @@ pub fn bootstrap_env() -> Env {
     e.define("null?".to_string(), Value::Builtin(null));
     e.define("car".to_string(), Value::Builtin(car));
     e.define("cdr".to_string(), Value::Builtin(cdr));
+    e.define("cons".to_string(), Value::Builtin(cons));
     e
 }

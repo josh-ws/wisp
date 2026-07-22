@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::env::Env;
 use crate::reader::Sexp;
 use crate::value::{Lambda, Value};
@@ -91,11 +93,11 @@ fn quote(sexp: &Sexp) -> Result<Value, String> {
         Sexp::Bool(b) => Ok(Value::Bool(*b)),
         Sexp::Symbol(s) => Ok(Value::Symbol(s.clone())),
         Sexp::List(l) => {
-            let mut vals = Vec::new();
-            for s in l {
-                vals.push(quote(s)?);
+            let mut acc = Value::Nil;
+            for s in l.iter().rev() {
+                acc = Value::cons(quote(s)?, acc);
             }
-            Ok(Value::List(vals))
+            Ok(acc)
         }
     }
 }

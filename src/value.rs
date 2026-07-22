@@ -1,4 +1,7 @@
-use std::fmt::{self, Display};
+use std::{
+    fmt::{self, Display},
+    rc::Rc,
+};
 
 use crate::reader::Sexp;
 
@@ -11,13 +14,32 @@ pub struct Lambda {
 }
 
 #[derive(Debug, Clone)]
+pub struct Pair {
+    pub car: Value,
+    pub cdr: Value,
+}
+
+impl PartialEq for Pair {
+    fn eq(&self, other: &Self) -> bool {
+        self.car == other.car && self.cdr == other.cdr
+    }
+}
+
+#[derive(Debug, Clone)]
 pub enum Value {
     Number(f64),
     Bool(bool),
-    List(Vec<Value>),
+    Nil,
+    Pair(Rc<Pair>),
     Symbol(String),
     Builtin(Builtin),
     Lambda(Lambda),
+}
+
+impl Value {
+    pub fn cons(car: Value, cdr: Value) -> Value {
+        Value::Pair(Rc::new(Pair { car, cdr }))
+    }
 }
 
 impl PartialEq for Value {
@@ -25,7 +47,8 @@ impl PartialEq for Value {
         match (self, other) {
             (Value::Number(x), Value::Number(y)) => x == y,
             (Value::Bool(x), Value::Bool(y)) => x == y,
-            (Value::List(x), Value::List(y)) => x == y,
+            (Value::Nil, Value::Nil) => true,
+            (Value::Pair(x), Value::Pair(y)) => x == y,
             (Value::Symbol(x), Value::Symbol(y)) => x == y,
             _ => false,
         }
@@ -40,17 +63,9 @@ impl Display for Value {
             Value::Bool(false) => write!(f, "#f"),
             Value::Symbol(sym) => write!(f, "'{}", sym),
             Value::Builtin(_) => write!(f, "#<builtin>"),
-            Value::Lambda(l) => write!(f, "#<lambda>"),
-            Value::List(l) => {
-                write!(f, "(")?;
-                for (i, item) in l.iter().enumerate() {
-                    if i > 0 {
-                        write!(f, " ")?;
-                    }
-                    write!(f, "{}", item)?;
-                }
-                write!(f, ")")
-            }
+            Value::Lambda(_) => write!(f, "#<lambda>"),
+            Value::Nil => write!(f, "()"),
+            Value::Pair(p) => write!(f, "({} . {})", p.car, p.cdr),
         }
     }
 }
