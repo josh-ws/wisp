@@ -1,7 +1,4 @@
-use crate::{
-    env::{Arena, Env},
-    value::Value,
-};
+use crate::{env::Arena, value::Value};
 
 // TODO:
 // Special forms: quote, cond, lambda, define, and, or
@@ -11,7 +8,19 @@ use crate::{
 
 // Checks for argument being an atom, i.e. non-list. Single argument
 fn atom(args: &[Value]) -> Result<Value, String> {
-    Err("not implemented".to_string())
+    match args {
+        [Value::Pair(_)] => Ok(Value::Bool(false)),
+        [_] => Ok(Value::Bool(true)),
+        _ => Err(format!("atom? expects 1 argument, {} provided", args.len())),
+    }
+}
+
+fn null(args: &[Value]) -> Result<Value, String> {
+    match args {
+        [Value::Nil] => Ok(Value::Bool(true)),
+        [_] => Ok(Value::Bool(false)),
+        _ => Err(format!("null? expects 1 argument, {} provided", args.len())),
+    }
 }
 
 // Quick check for same object, no recursion.
@@ -62,10 +71,6 @@ fn not(args: &[Value]) -> Result<Value, String> {
 
 // also temp
 fn equal(args: &[Value]) -> Result<Value, String> {
-    Err("not implemented".to_string())
-}
-
-fn null(args: &[Value]) -> Result<Value, String> {
     Err("not implemented".to_string())
 }
 
