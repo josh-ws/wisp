@@ -3,71 +3,90 @@ use crate::{
     value::Value,
 };
 
-// quote, cond, lambda, define
-// atom, eq, car, cdr, cons
-// +, *, -, /
-// and, or, not
+// TODO:
+// Special forms: quote, cond, lambda, define, and, or
+// Builtins: atom, eq?, =, car, cdr, cons, +, -, *, /
+// Prelude: not
 // https://leinonen.ninja/posts/building-lisp-from-the-ground-up
 
-fn add(args: &[Value]) -> Result<Value, String> {
-    let mut sum = 0.0;
-    for arg in args {
-        match arg {
-            Value::Number(n) => sum += n,
-            other => return Err(format!("+ expects numbers, got {}", other)),
-        }
-    }
-    Ok(Value::Number(sum))
+// Checks for argument being an atom, i.e. non-list. Single argument
+fn atom(args: &[Value]) -> Result<Value, String> {
+    Err("not implemented".to_string())
 }
 
-fn equal(args: &[Value]) -> Result<Value, String> {
-    match args {
-        [a, b] => Ok(Value::Bool(a == b)),
-        _ => Err("eq expects two args".into()),
-    }
+// Quick check for same object, no recursion.
+fn eq(args: &[Value]) -> Result<Value, String> {
+    Err("not implemented".to_string())
 }
 
-fn null(args: &[Value]) -> Result<Value, String> {
-    match args {
-        [Value::Nil] => Ok(Value::Bool(true)),
-        [_] => Ok(Value::Bool(false)),
-        _ => Err("null? expects a single argument".into()),
-    }
+fn numeric_eq(args: &[Value]) -> Result<Value, String> {
+    Err("not implemented".to_string())
+}
+
+fn numeric_add(args: &[Value]) -> Result<Value, String> {
+    Err("not implemented".to_string())
+}
+
+fn numeric_sub(args: &[Value]) -> Result<Value, String> {
+    Err("not implemented".to_string())
+}
+
+fn numeric_mul(args: &[Value]) -> Result<Value, String> {
+    Err("not implemented".to_string())
+}
+
+fn numeric_div(args: &[Value]) -> Result<Value, String> {
+    Err("not implemented".to_string())
+}
+
+fn numeric_lt(args: &[Value]) -> Result<Value, String> {
+    Err("not implemented".to_string())
 }
 
 fn car(args: &[Value]) -> Result<Value, String> {
-    match args {
-        [Value::Pair(p)] => Ok(p.car.clone()),
-        [Value::Nil] => Err("car: empty list".into()),
-        [other] => Err(format!("car expects a list, got {}", other)),
-        _ => Err("car expects one arg".into()),
-    }
+    Err("not implemented".to_string())
 }
 
 fn cdr(args: &[Value]) -> Result<Value, String> {
-    match args {
-        [Value::Pair(p)] => Ok(p.cdr.clone()),
-        [Value::Nil] => Err("cdr: empty list".into()),
-        [other] => Err(format!("cdr expects a list, got {}", other)),
-        _ => Err("cdr expects one arg".into()),
-    }
+    Err("not implemented".to_string())
 }
 
 fn cons(args: &[Value]) -> Result<Value, String> {
-    match args {
-        [a, b] => Ok(Value::cons(a.clone(), b.clone())),
-        _ => Err("cons expects two args".into()),
-    }
+    Err("not implemented".to_string())
+}
+
+// temporary, until we have the prelude
+fn not(args: &[Value]) -> Result<Value, String> {
+    Err("not implemented".to_string())
+}
+
+// also temp
+fn equal(args: &[Value]) -> Result<Value, String> {
+    Err("not implemented".to_string())
+}
+
+fn null(args: &[Value]) -> Result<Value, String> {
+    Err("not implemented".to_string())
 }
 
 pub fn bootstrap_env() -> Arena {
     let mut a = Arena::new();
     let root = a.root();
-    a.define(root, "+".to_string(), Value::Builtin(add));
+
+    a.define(root, "atom?".to_string(), Value::Builtin(atom));
+    a.define(root, "eq?".to_string(), Value::Builtin(eq));
+    a.define(root, "not".to_string(), Value::Builtin(not));
     a.define(root, "equal?".to_string(), Value::Builtin(equal));
     a.define(root, "null?".to_string(), Value::Builtin(null));
+    a.define(root, "=".to_string(), Value::Builtin(numeric_eq));
+    a.define(root, "+".to_string(), Value::Builtin(numeric_add));
+    a.define(root, "-".to_string(), Value::Builtin(numeric_sub));
+    a.define(root, "*".to_string(), Value::Builtin(numeric_mul));
+    a.define(root, "/".to_string(), Value::Builtin(numeric_div));
+    a.define(root, "<".to_string(), Value::Builtin(numeric_lt));
     a.define(root, "car".to_string(), Value::Builtin(car));
     a.define(root, "cdr".to_string(), Value::Builtin(cdr));
     a.define(root, "cons".to_string(), Value::Builtin(cons));
+
     a
 }
