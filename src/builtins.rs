@@ -39,7 +39,19 @@ fn eq(args: &[Value]) -> Result<Value, String> {
 }
 
 fn numeric_eq(args: &[Value]) -> Result<Value, String> {
-    Err("not implemented".to_string())
+    match args {
+        [Value::Number(a), Value::Number(b)] => Ok(Value::Bool(a == b)),
+        [_, _] => Err("= expects numeric arguments".to_string()),
+        _ => Err(format!("= expects 2 arguments, {} provided", args.len())),
+    }
+}
+
+fn numeric_lt(args: &[Value]) -> Result<Value, String> {
+    match args {
+        [Value::Number(a), Value::Number(b)] => Ok(Value::Bool(a < b)),
+        [_, _] => Err("< expects numeric arguments".to_string()),
+        _ => Err(format!("< expects 2 arguments, {} provided", args.len())),
+    }
 }
 
 fn numeric_add(args: &[Value]) -> Result<Value, String> {
@@ -55,10 +67,6 @@ fn numeric_mul(args: &[Value]) -> Result<Value, String> {
 }
 
 fn numeric_div(args: &[Value]) -> Result<Value, String> {
-    Err("not implemented".to_string())
-}
-
-fn numeric_lt(args: &[Value]) -> Result<Value, String> {
     Err("not implemented".to_string())
 }
 
@@ -105,6 +113,17 @@ fn equal(args: &[Value]) -> Result<Value, String> {
             args.len()
         )),
     }
+}
+
+fn as_numbers(args: &[Value]) -> Result<Vec<f64>, String> {
+    let mut f = Vec::new();
+    for arg in args {
+        match arg {
+            Value::Number(x) => f.push(*x),
+            _ => return Err(format!("expected number, received {}", arg)),
+        }
+    }
+    Ok(f)
 }
 
 pub fn bootstrap_env() -> Arena {
