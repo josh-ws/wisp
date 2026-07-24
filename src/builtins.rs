@@ -55,19 +55,29 @@ fn numeric_lt(args: &[Value]) -> Result<Value, String> {
 }
 
 fn numeric_add(args: &[Value]) -> Result<Value, String> {
-    Err("not implemented".to_string())
+    Ok(Value::Number(as_numbers(args)?.iter().sum()))
 }
 
 fn numeric_sub(args: &[Value]) -> Result<Value, String> {
-    Err("not implemented".to_string())
+    let nums = as_numbers(args)?;
+    match nums.as_slice() {
+        [] => Err("- expects at least 1 argument".to_string()),
+        [x] => Ok(Value::Number(-x)),
+        [first, rest @ ..] => Ok(Value::Number(rest.iter().fold(*first, |acc, n| acc - n))),
+    }
 }
 
 fn numeric_mul(args: &[Value]) -> Result<Value, String> {
-    Err("not implemented".to_string())
+    Ok(Value::Number(as_numbers(args)?.iter().product()))
 }
 
 fn numeric_div(args: &[Value]) -> Result<Value, String> {
-    Err("not implemented".to_string())
+    let nums = as_numbers(args)?;
+    match nums.as_slice() {
+        [] => Err("/ expects at least 1 argument".to_string()),
+        [x] => Ok(Value::Number(1.0 / x)),
+        [first, rest @ ..] => Ok(Value::Number(rest.iter().fold(*first, |acc, n| acc / n))),
+    }
 }
 
 fn car(args: &[Value]) -> Result<Value, String> {
