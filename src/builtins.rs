@@ -1,12 +1,28 @@
 use std::rc::Rc;
 
-use crate::{env::Arena, value::Value};
+use crate::{
+    env::{Arena, Env},
+    eval::eval,
+    reader::read,
+    value::Value,
+};
 
 // TODO:
 // Special forms: quote, cond, lambda, define, and, or
 // Builtins: atom, eq?, =, car, cdr, cons, +, -, *, /
 // Prelude: not
 // https://leinonen.ninja/posts/building-lisp-from-the-ground-up
+
+const PRELUDE: &str = include_str!("prelude.scm");
+
+fn load_prelude(arena: &mut Arena, root: Env) {
+    let forms = read(PRELUDE).expect("parse error loading prelude");
+    for form in &forms {
+        if let Err(e) = eval(arena, root, form) {
+            panic!("prelude: failed to eval {:?}\n{}", form, e);
+        }
+    }
+}
 
 // Checks for argument being an atom, i.e. non-list. Single argument
 fn atom(args: &[Value]) -> Result<Value, String> {
@@ -154,6 +170,6 @@ pub fn bootstrap_env() -> Arena {
     a.define(root, "car".to_string(), Value::Builtin(car));
     a.define(root, "cdr".to_string(), Value::Builtin(cdr));
     a.define(root, "cons".to_string(), Value::Builtin(cons));
-
+    load_prelude(&mut a, root);
     a
 }
