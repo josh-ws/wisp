@@ -63,25 +63,48 @@ fn numeric_lt(args: &[Value]) -> Result<Value, String> {
 }
 
 fn car(args: &[Value]) -> Result<Value, String> {
-    Err("not implemented".to_string())
+    match args {
+        [Value::Pair(p)] => Ok(p.car.clone()),
+        [Value::Nil] => Err("car: empty list".to_string()),
+        [other] => Err(format!("car expects a pair, got {}", other)),
+        _ => Err(format!("car expects 1 argument, {} provided", args.len())),
+    }
 }
 
 fn cdr(args: &[Value]) -> Result<Value, String> {
-    Err("not implemented".to_string())
+    match args {
+        [Value::Pair(p)] => Ok(p.cdr.clone()),
+        [Value::Nil] => Err("cdr: empty list".to_string()),
+        [other] => Err(format!("cdr expects a pair, got {}", other)),
+        _ => Err(format!("cdr expects 1 argument, {} provided", args.len())),
+    }
 }
 
 fn cons(args: &[Value]) -> Result<Value, String> {
-    Err("not implemented".to_string())
+    match args {
+        [a, b] => Ok(Value::cons(a.clone(), b.clone())),
+        _ => Err(format!("cons expects 2 arguments, {} provided", args.len())),
+    }
 }
 
 // temporary, until we have the prelude
 fn not(args: &[Value]) -> Result<Value, String> {
-    Err("not implemented".to_string())
+    match args {
+        [Value::Bool(false)] => Ok(Value::Bool(true)),
+        [_] => Ok(Value::Bool(false)),
+        _ => Err(format!("not expects 1 argument, {} provided", args.len())),
+    }
 }
 
 // also temp
 fn equal(args: &[Value]) -> Result<Value, String> {
-    Err("not implemented".to_string())
+    match args {
+        [a, b] => Ok(Value::Bool(a == b)),
+        _ => Err(format!(
+            "equal? expects 2 arguments, {} provided",
+            args.len()
+        )),
+    }
 }
 
 pub fn bootstrap_env() -> Arena {
