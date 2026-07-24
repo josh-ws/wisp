@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::{env::Arena, value::Value};
 
 // TODO:
@@ -25,7 +27,15 @@ fn null(args: &[Value]) -> Result<Value, String> {
 
 // Quick check for same object, no recursion.
 fn eq(args: &[Value]) -> Result<Value, String> {
-    Err("not implemented".to_string())
+    match args {
+        [Value::Number(x), Value::Number(y)] => Ok(Value::Bool(x == y)),
+        [Value::Bool(x), Value::Bool(y)] => Ok(Value::Bool(x == y)),
+        [Value::Nil, Value::Nil] => Ok(Value::Bool(true)),
+        [Value::Pair(x), Value::Pair(y)] => Ok(Value::Bool(Rc::ptr_eq(x, y))),
+        [Value::Symbol(x), Value::Symbol(y)] => Ok(Value::Bool(x == y)),
+        [_, _] => Ok(Value::Bool(false)),
+        _ => Err(format!("eq? expects 2 arguments, {} provided", args.len())),
+    }
 }
 
 fn numeric_eq(args: &[Value]) -> Result<Value, String> {
