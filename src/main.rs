@@ -1,13 +1,8 @@
-mod builtins;
-mod env;
-mod eval;
-mod reader;
-mod value;
-
-use crate::builtins::bootstrap_env;
-use crate::eval::eval;
-use crate::reader::read;
 use std::io::{self, BufRead, Write};
+
+use wisp::builtins::bootstrap_env;
+use wisp::eval::eval;
+use wisp::reader::read;
 
 fn main() {
     let mut arena = bootstrap_env();
