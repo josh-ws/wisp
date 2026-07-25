@@ -121,26 +121,6 @@ fn cons(args: &[Value]) -> Result<Value, String> {
     }
 }
 
-// temporary, until we have the prelude
-fn not(args: &[Value]) -> Result<Value, String> {
-    match args {
-        [Value::Bool(false)] => Ok(Value::Bool(true)),
-        [_] => Ok(Value::Bool(false)),
-        _ => Err(format!("not expects 1 argument, {} provided", args.len())),
-    }
-}
-
-// also temp
-fn equal(args: &[Value]) -> Result<Value, String> {
-    match args {
-        [a, b] => Ok(Value::Bool(a == b)),
-        _ => Err(format!(
-            "equal? expects 2 arguments, {} provided",
-            args.len()
-        )),
-    }
-}
-
 fn as_numbers(args: &[Value]) -> Result<Vec<f64>, String> {
     let mut f = Vec::new();
     for arg in args {
@@ -158,8 +138,6 @@ pub fn bootstrap_env() -> Arena {
 
     a.define(root, "atom?".to_string(), Value::Builtin(atom));
     a.define(root, "eq?".to_string(), Value::Builtin(eq));
-    a.define(root, "not".to_string(), Value::Builtin(not));
-    a.define(root, "equal?".to_string(), Value::Builtin(equal));
     a.define(root, "null?".to_string(), Value::Builtin(null));
     a.define(root, "=".to_string(), Value::Builtin(numeric_eq));
     a.define(root, "+".to_string(), Value::Builtin(numeric_add));
