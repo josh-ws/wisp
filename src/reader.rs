@@ -26,10 +26,21 @@ fn lex(src: &str) -> Vec<Token> {
                 chars.next();
                 tokens.push(Token::Quote);
             }
+            ';' => loop {
+                let c = chars.next();
+                match c {
+                    Some(c) => {
+                        if c == '\n' {
+                            break;
+                        }
+                    }
+                    None => break,
+                }
+            },
             _ => {
                 let mut s = String::new();
                 while let Some(&c) = chars.peek() {
-                    if c.is_whitespace() || "()".contains(c) {
+                    if c.is_whitespace() || "();".contains(c) {
                         break;
                     }
                     s.push(c);

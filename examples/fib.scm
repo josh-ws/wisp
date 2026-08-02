@@ -1,3 +1,5 @@
+; prints first 20 fibonacci numbers
+
 (define fib
   (lambda (n)
     (if (< n 2)
