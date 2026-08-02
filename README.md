@@ -4,7 +4,7 @@
 
 ## Usage
 
-Just `cargo run` in the root to start the REPL
+Just `cargo run` in the root to start the REPL, or `cargo run [file1, file2, ...]` to run prewritten wisp.
 
 ## Features
 
@@ -14,6 +14,10 @@ Just `cargo run` in the root to start the REPL
 - Recoverable errors
 - No dependencies
 - Scheme-style truthy values (only `#f` is false)
+
+## Examples
+
+- `examples/fib.scm`: Prints the first 20 fibonacci numbers.
 
 ## Limitations (the wishlist)
 
