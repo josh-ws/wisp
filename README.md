@@ -28,9 +28,9 @@ Some of these may be out of scope, but who knows?
 - Memory grows with calls and is not freed (keeps the design simpler)
 - Lots of missing builtins and special forms
 - No strings, characters, vectors or maps
-- No comments
 - Every number is float, no 'numerical tower'
-- REPL only, no file reading
+- ~~REPL only, no file reading~~
+- ~~No comments~~
 
 ## Sample
 
