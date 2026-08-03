@@ -121,6 +121,16 @@ fn cons(args: &[Value]) -> Result<Value, String> {
     }
 }
 
+fn display(args: &[Value]) -> Result<Value, String> {
+    match args {
+        [a] => {
+            println!("{}", a);
+            Ok(Value::Nil)
+        }
+        _ => Err(format!("display expects 1 argument, {} given", args.len())),
+    }
+}
+
 fn as_numbers(args: &[Value]) -> Result<Vec<f64>, String> {
     let mut f = Vec::new();
     for arg in args {
@@ -148,6 +158,7 @@ pub fn bootstrap_env() -> Arena {
     a.define(root, "car".to_string(), Value::Builtin(car));
     a.define(root, "cdr".to_string(), Value::Builtin(cdr));
     a.define(root, "cons".to_string(), Value::Builtin(cons));
+    a.define(root, "display".to_string(), Value::Builtin(display));
     load_prelude(&mut a, root);
     a
 }
