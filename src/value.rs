@@ -26,6 +26,28 @@ impl PartialEq for Pair {
     }
 }
 
+impl Display for Pair {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({}", self.car)?;
+
+        let mut cdr = &self.cdr;
+        loop {
+            match cdr {
+                Value::Nil => break,
+                Value::Pair(next) => {
+                    write!(f, " {}", next.car)?;
+                    cdr = &next.cdr;
+                }
+                tail => {
+                    write!(f, " . {}", tail)?;
+                    break;
+                }
+            }
+        }
+        write!(f, ")")
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum Value {
     Number(f64),
@@ -62,11 +84,11 @@ impl Display for Value {
             Value::Number(n) => write!(f, "{}", n),
             Value::Bool(true) => write!(f, "#t"),
             Value::Bool(false) => write!(f, "#f"),
-            Value::Symbol(sym) => write!(f, "'{}", sym),
+            Value::Symbol(sym) => write!(f, "{}", sym),
             Value::Builtin(_) => write!(f, "#<builtin>"),
             Value::Lambda(_) => write!(f, "#<lambda>"),
             Value::Nil => write!(f, "()"),
-            Value::Pair(p) => write!(f, "({} . {})", p.car, p.cdr),
+            Value::Pair(p) => write!(f, "{}", p),
         }
     }
 }
